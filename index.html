@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A.08 Proveedores · Silver Industrial</title>
+<link rel="icon" href="data:,">
+<script src="chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--az:#0b3a6e;--az2:#1a5fa8;--bg:#f3f5f8;--tx:#1d2733;--mu:#64748b;--ln:#d8dee7;--ok:#15803d;--mal:#b91c1c;--am:#b45309;--cA:#16a34a;--cB:#2563eb;--cC:#f59e0b;--cD:#dc2626;--cS:#94a3b8}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:var(--az);color:#fff;padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:600}header .sp{flex:1}header small{opacity:.85}
+nav{display:flex;gap:4px;padding:8px 18px 0;background:#fff;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+nav button{border:0;background:none;padding:9px 14px;cursor:pointer;font:inherit;color:var(--mu);border-bottom:3px solid transparent}
+nav button.on{color:var(--az);border-color:var(--az2);font-weight:600}
+main{padding:16px 18px;max-width:1400px;margin:0 auto}
+.card{background:#fff;border:1px solid var(--ln);border-radius:10px;padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 8px;font-size:14px;color:var(--az)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:3px}
+input,select,textarea,button{font:inherit}input,select,textarea{border:1px solid var(--ln);border-radius:6px;padding:6px 8px;background:#fff;color:var(--tx)}
+input[type=number]{width:70px}
+button.b{background:var(--az2);color:#fff;border:0;border-radius:6px;padding:7px 13px;cursor:pointer}button.b.g{background:#fff;color:var(--az2);border:1px solid var(--az2)}button.b:disabled{opacity:.45;cursor:not-allowed}
+button.b.v{background:linear-gradient(135deg,#16a34a,#0d9488)}button.b.n{background:linear-gradient(135deg,#f59e0b,#ea580c)}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid var(--ln);padding:6px 8px;text-align:left;vertical-align:middle}th{background:#eef2f7;position:sticky;top:0;font-size:12px;color:var(--mu)}
+tr.cl{cursor:pointer}tr.cl:hover{background:#f0f6ff}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#e5eaf1}
+.tag.A{background:#dcfce7;color:#166534}.tag.B{background:#dbeafe;color:#1e40af}.tag.C{background:#fef3c7;color:#92400e}.tag.D{background:#fee2e2;color:#991b1b}.tag.S{background:#e2e8f0;color:#475569}
+.tag.crit{background:#fde7e7;color:var(--mal)}.tag.prov{background:#fff1d6;color:var(--am)}.tag.disc{background:#e2e8f0;color:#475569}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpi{border-radius:12px;padding:12px 14px;color:#fff;box-shadow:0 4px 10px #0002}.kpi b{font-size:28px;display:block}.kpi span{font-size:12px;opacity:.92}
+.k1{background:linear-gradient(135deg,#1a5fa8,#0b3a6e)}.k2{background:linear-gradient(135deg,#16a34a,#0f766e)}.k3{background:linear-gradient(135deg,#f59e0b,#d97706)}.k4{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}.k5{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+.ch{position:relative;height:280px}
+.pie3d{height:240px;margin:6px auto 0;max-width:340px;transform:perspective(800px) rotateX(48deg);filter:drop-shadow(0 22px 0 #0003)}
+.leg{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px;font-size:12px}.leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.msg{padding:8px 12px;border-radius:6px;margin:8px 0;font-size:13px}.msg.e{background:#fde7e7;color:var(--mal)}.msg.o{background:#e3f4e8;color:var(--ok)}.msg.i{background:#e8f0fb;color:var(--az)}
+.login{max-width:340px;margin:60px auto;display:flex;flex-direction:column;gap:10px}
+.modal{position:fixed;inset:0;background:#0007;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 10px;z-index:9}.modal .card{width:min(640px,100%)}
+.meta{font-size:12px;color:var(--mu)}
+.warn{color:var(--am);font-size:12px}
+footer{text-align:center;color:var(--mu);font-size:12px;padding:18px}
+.scroll{max-height:560px;overflow:auto}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer>Desarrollado por Mgter. Diego Ortiz — Líder de Mejora Continua | Consultor ISO</footer>
+<script>
+const API="https://nc-silver-api.diegortizdao.workers.dev/api";
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const COL={A:'#16a34a',B:'#2563eb',C:'#f59e0b',D:'#dc2626','Sin evaluar':'#94a3b8'};
+const ORD=['A','B','C','D'];
+const S={tok:null,user:null,edita:false,provs:[],evs:[],vista:'dash',anio:new Date().getFullYear(),f:{q:'',estado:'',tipo:'',crit:'',clase:''},msg:null,sel:null};
+try{const s=JSON.parse(sessionStorage.getItem('rec')||'null');if(s&&s.expira>Date.now()){S.tok=s.token;S.user=s.usuario;S.edita=s.edita}}catch{}
+const dmy=i=>i?String(i).slice(8,10)+'/'+String(i).slice(5,7)+'/'+String(i).slice(0,4):'';
+const CH=[];
+function nuke(){while(CH.length)CH.pop().destroy()}
+
+async function api(path,opt={}){
+  const h={};if(S.tok)h.Authorization='Bearer '+S.tok;
+  if(opt.json!==undefined){h['Content-Type']='application/json'}
+  const r=await fetch(API+path,{method:opt.method||'GET',headers:h,body:opt.json!==undefined?JSON.stringify(opt.json):undefined});
+  if(r.status===401&&S.tok&&!path.endsWith('/login')){salir();throw new Error('La sesión venció. Ingresá de nuevo.')}
+  let j=null;try{j=await r.json()}catch{}
+  if(!r.ok)throw new Error((j&&j.error)||('Error '+r.status));
+  return j;
+}
+function salir(){S.tok=null;try{sessionStorage.removeItem('rec')}catch{}render()}
+async function cargar(){const r=await api('/proveedores');S.provs=r.proveedores;S.evs=r.evaluaciones;S.edita=!!r.edita||S.edita}
+
+/* ---------- reglas I.01 ---------- */
+const evDe=(id,anio)=>S.evs.find(e=>e.proveedor_id===id&&e.anio===anio);
+function claveAnt(id,anio){const p=S.evs.filter(e=>e.proveedor_id===id&&e.anio<anio&&ORD.includes(e.clase)).sort((a,b)=>b.anio-a.anio)[0];return p?p.clase:'A'}
+function incumple(c,f,m){return (c||0)>=7||(f||0)>=5||(m||0)>=3}
+function sugerida(id,anio,c,f,m){const a=claveAnt(id,anio),i=ORD.indexOf(a);return incumple(c,f,m)?ORD[Math.min(3,i+1)]:ORD[Math.max(0,i-1)]}
+const incid=e=>e?((e.no_certificado||0)+(e.fuera_fecha||0)+(e.malas_condiciones||0)):0;
+const aniosDisp=()=>{const s=new Set(S.evs.map(e=>e.anio));s.add(new Date().getFullYear());return [...s].sort((a,b)=>b-a)};
+const activos=()=>S.provs.filter(p=>p.estado!=='discontinuado');
+const tagClase=c=>c?`<span class="tag ${c==='Sin evaluar'?'S':c}">${c==='Sin evaluar'?'Sin evaluar':'Clase '+c}</span>`:'<span class="tag S">—</span>';
+
+function render(){
+  nuke();const a=$('#app');
+  if(!S.tok){a.innerHTML=`<header><h1>A.08 · Proveedores</h1></header><div class="card login"><h3>Ingresar</h3>
+  <label>Nombre completo<input id="ln" placeholder="Nombre y apellido" autocomplete="off"></label>
+  <label>Contraseña<input id="lp" type="password"></label><div id="lm"></div><button class="b" id="lb">Entrar</button></div>`;
+    const go=async()=>{try{const r=await api('/reclamos/login',{method:'POST',json:{nombre:$('#ln').value,password:$('#lp').value}});
+      S.tok=r.token;S.user=r.usuario;S.edita=r.edita;sessionStorage.setItem('rec',JSON.stringify(r));await cargar();render()}catch(e){$('#lm').innerHTML=`<div class="msg e">${esc(e.message)}</div>`}};
+    $('#lb').onclick=go;$('#lp').onkeydown=e=>{if(e.key==='Enter')go()};return}
+  const tabs=[['dash','Tablero'],['list','A.08 Listado'],...(S.edita?[['eval','Evaluación anual']]:[])];
+  a.innerHTML=`<header><h1>A.08 · Proveedores — Silver Industrial</h1><span class="sp"></span><small>${esc(S.user)} · ${S.edita?'edición':'solo consulta'}</small><button class="b g" id="sal" style="background:none;color:#fff;border-color:#fff8">Salir</button></header>
+  <nav>${tabs.map(t=>`<button data-v="${t[0]}" class="${S.vista===t[0]?'on':''}">${t[1]}</button>`).join('')}</nav><main id="m"></main>`;
+  $('#sal').onclick=salir;a.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{S.vista=b.dataset.v;S.msg=null;render()});
+  ({dash:vDash,list:vList,eval:vEval})[S.vista]();
+}
+const selAnio=()=>`<label>Año<select id="sa">${aniosDisp().map(y=>`<option ${y===S.anio?'selected':''}>${y}</option>`).join('')}</select></label>`;
+const bindAnio=()=>{const s=$('#sa');if(s)s.onchange=()=>{S.anio=+s.value;render()}};
+
+/* ---------- Tablero ---------- */
+function vDash(){
+  const evs=S.evs.filter(e=>e.anio===S.anio&&S.provs.find(p=>p.id===e.proveedor_id&&p.estado!=='discontinuado'));
+  const calif=evs.filter(e=>ORD.includes(e.clase));
+  const cA=calif.filter(e=>e.clase==='A').length,pct=calif.length?cA/calif.length*100:0;
+  const conInc=evs.filter(e=>incid(e)>0).length,crit=S.provs.filter(p=>p.critico&&p.estado!=='discontinuado').length;
+  const cnt={A:0,B:0,C:0,D:0,'Sin evaluar':0};evs.forEach(e=>{if(e.clase in cnt)cnt[e.clase]++});
+  const sum=k=>evs.reduce((t,e)=>t+(e[k]||0),0);
+  const top=evs.filter(e=>incid(e)>0).map(e=>({n:S.provs.find(p=>p.id===e.proveedor_id).nombre,v:incid(e)})).sort((a,b)=>b.v-a.v).slice(0,8);
+  const porAnio=aniosDisp().slice().reverse().map(y=>{const l=S.evs.filter(e=>e.anio===y&&ORD.includes(e.clase));return{y,p:l.length?+(l.filter(e=>e.clase==='A').length/l.length*100).toFixed(1):null}}).filter(x=>x.p!==null);
+  const est={aprobado:0,provisorio:0,discontinuado:0},tip={Material:0,Servicio:0};S.provs.forEach(p=>{est[p.estado]++;if(p.estado!=='discontinuado')tip[p.tipo]++});
+  $('#m').innerHTML=`<div class="row" style="margin-bottom:10px">${selAnio()}<span class="meta">Meta del Apéndice C: clase A &gt; 95 % de los proveedores calificados.</span></div>
+  <div class="kpis"><div class="kpi k1"><b>${activos().length}</b><span>Proveedores activos</span></div>
+  <div class="kpi k2"><b>${pct.toFixed(1)} %</b><span>Clase A (${cA} de ${calif.length} calificados) ${pct>95?'· cumple':'· bajo la meta'}</span></div>
+  <div class="kpi k3"><b>${conInc}</b><span>Con incumplimientos en ${S.anio}</span></div>
+  <div class="kpi k4"><b>${crit}</b><span>Críticos</span></div>
+  <div class="kpi k5"><b>${cnt.B+cnt.C+cnt.D}</b><span>Clase B, C o D</span></div></div>
+  <div class="grid2">
+  <div class="card"><h3>Proveedores por clase (${S.anio})</h3><div class="pie3d"><canvas id="c1"></canvas></div><div class="leg">${Object.keys(cnt).filter(k=>cnt[k]).map(k=>`<span><i style="background:${COL[k]}"></i>${k==='Sin evaluar'?k:'Clase '+k}: ${cnt[k]}</span>`).join('')||'Sin evaluaciones'}</div></div>
+  <div class="card"><h3>Incumplimientos por criterio (${S.anio})</h3><div class="ch"><canvas id="c2"></canvas></div></div>
+  <div class="card"><h3>Proveedores con más incumplimientos</h3><div class="ch"><canvas id="c3"></canvas></div></div>
+  <div class="card"><h3>Evolución de la clase A (%)</h3><div class="ch"><canvas id="c4"></canvas></div></div>
+  <div class="card"><h3>Materiales vs. servicios (activos)</h3><div class="ch"><canvas id="c5"></canvas></div></div>
+  <div class="card"><h3>Estado del listado A.08</h3><div class="ch"><canvas id="c6"></canvas></div></div></div>`;
+  bindAnio();
+  const base={maintainAspectRatio:false,plugins:{legend:{display:false}}};
+  CH.push(new Chart($('#c1'),{type:'pie',data:{labels:Object.keys(cnt),datasets:[{data:Object.values(cnt),backgroundColor:Object.keys(cnt).map(k=>COL[k]),borderColor:'#fff',borderWidth:3}]},options:{...base,plugins:{legend:{display:false}}}}));
+  CH.push(new Chart($('#c2'),{type:'bar',data:{labels:['Sin certificado','Fuera de fecha','Malas condiciones'],datasets:[{data:[sum('no_certificado'),sum('fuera_fecha'),sum('malas_condiciones')],backgroundColor:['#8b5cf6','#f59e0b','#ef4444'],borderRadius:8}]},options:{...base,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}}));
+  CH.push(new Chart($('#c3'),{type:'bar',data:{labels:top.map(t=>t.n),datasets:[{data:top.map(t=>t.v),backgroundColor:'#2563eb',borderRadius:6}]},options:{...base,indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{precision:0}}}}}));
+  CH.push(new Chart($('#c4'),{type:'line',data:{labels:porAnio.map(x=>x.y),datasets:[{data:porAnio.map(x=>x.p),borderColor:'#16a34a',backgroundColor:'#16a34a33',fill:true,tension:.3,pointRadius:5},{data:porAnio.map(()=>95),borderColor:'#dc2626',borderDash:[6,4],pointRadius:0}]},options:{...base,scales:{y:{min:80,max:100}}}}));
+  CH.push(new Chart($('#c5'),{type:'doughnut',data:{labels:Object.keys(tip),datasets:[{data:Object.values(tip),backgroundColor:['#1a5fa8','#14b8a6'],borderColor:'#fff',borderWidth:3}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
+  CH.push(new Chart($('#c6'),{type:'polarArea',data:{labels:['Aprobados','Provisorios','Discontinuados'],datasets:[{data:[est.aprobado,est.provisorio,est.discontinuado],backgroundColor:['#16a34acc','#f59e0bcc','#94a3b8cc']}]},options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
+}
+
+/* ---------- A.08 Listado ---------- */
+function filtrados(){const f=S.f,q=f.q.toLowerCase();return S.provs.filter(p=>{
+  if(f.estado&&p.estado!==f.estado)return false;if(f.tipo&&p.tipo!==f.tipo)return false;
+  if(f.crit==='s'&&!p.critico)return false;if(f.crit==='n'&&p.critico)return false;
+  const e=evDe(p.id,S.anio);if(f.clase&&(e?e.clase:'—')!==f.clase)return false;
+  if(q&&!(p.nombre+' '+(p.observaciones||'')).toLowerCase().includes(q))return false;return true})}
+function vList(){
+  const L=filtrados();
+  $('#m').innerHTML=(S.msg?`<div class="msg ${S.msg.t}">${esc(S.msg.m)}</div>`:'')+
+  (S.edita?`<div class="card"><h3>Alta rápida de proveedor</h3><div class="row">
+   <label>Nombre<input id="an" placeholder="Razón social o nombre" style="min-width:240px"></label>
+   <label>Tipo<select id="at"><option>Material</option><option>Servicio</option></select></label>
+   <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="ac" checked> Crítico</label>
+   <button class="b v" id="ab">Agregar al A.08</button><span class="meta">Entra como «provisorio» hasta la segunda compra (I.01 punto I.3). La fecha de ingreso es la de hoy.</span></div></div>`:'')+
+  `<div class="card"><div class="row">
+   <label>Buscar<input id="fq" value="${esc(S.f.q)}" placeholder="Nombre u observación"></label>${selAnio()}
+   <label>Estado<select id="fe"><option value="">Todos</option>${['aprobado','provisorio','discontinuado'].map(x=>`<option ${S.f.estado===x?'selected':''}>${x}</option>`).join('')}</select></label>
+   <label>Tipo<select id="ft"><option value="">Todos</option><option ${S.f.tipo==='Material'?'selected':''}>Material</option><option ${S.f.tipo==='Servicio'?'selected':''}>Servicio</option></select></label>
+   <label>Crítico<select id="fk"><option value="">Todos</option><option value="s" ${S.f.crit==='s'?'selected':''}>Sí</option><option value="n" ${S.f.crit==='n'?'selected':''}>No</option></select></label>
+   <label>Clase ${S.anio}<select id="fc"><option value="">Todas</option>${['A','B','C','D','Sin evaluar','—'].map(x=>`<option ${S.f.clase===x?'selected':''}>${x}</option>`).join('')}</select></label>
+   <button class="b g" id="xl">Descargar Excel</button><span class="meta">${L.length} de ${S.provs.length}</span></div></div>
+  <div class="card scroll"><table><thead><tr><th>Proveedor</th><th>Tipo</th><th>Crít.</th><th>Estado</th><th>Ingreso</th><th>Clase ${S.anio}</th><th>Incid.</th><th>Observaciones</th></tr></thead><tbody>
+  ${L.map(p=>{const e=evDe(p.id,S.anio);return `<tr class="cl" data-id="${p.id}"><td><b>${esc(p.nombre)}</b></td><td>${p.tipo}</td><td>${p.critico?'<span class="tag crit">Crítico</span>':'–'}</td><td><span class="tag ${p.estado==='provisorio'?'prov':p.estado==='discontinuado'?'disc':''}">${p.estado}</span></td><td>${dmy(p.fecha_ingreso)||'–'}</td><td>${tagClase(e&&e.clase)}</td><td>${e?incid(e):'–'}</td><td class="meta">${esc((e&&e.observaciones)||p.observaciones||'')}</td></tr>`}).join('')}</tbody></table></div>`;
+  bindAnio();
+  const bind=(id,k)=>{const el=$('#'+id);if(el)el.onchange=()=>{S.f[k]=el.value;vList()}};
+  bind('fe','estado');bind('ft','tipo');bind('fk','crit');bind('fc','clase');
+  const fq=$('#fq');fq.oninput=()=>{S.f.q=fq.value;clearTimeout(fq._t);fq._t=setTimeout(()=>{vList();const n=$('#fq');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)};
+  $('#xl').onclick=excel;
+  document.querySelectorAll('tr.cl').forEach(r=>r.onclick=()=>modal(+r.dataset.id));
+  if(S.edita){$('#ab').onclick=async()=>{const n=$('#an').value.trim();if(!n){S.msg={t:'e',m:'Escribí el nombre del proveedor'};return vList()}
+    try{await api('/proveedores',{method:'POST',json:{nombre:n,tipo:$('#at').value,critico:$('#ac').checked}});await cargar();S.msg={t:'o',m:`«${n}» agregado al A.08 como provisorio.`}}catch(e){S.msg={t:'e',m:e.message}}vList()}}
+}
+function excel(){
+  const rows=filtrados().map(p=>{const e=evDe(p.id,S.anio);return{Proveedor:p.nombre,Tipo:p.tipo,Crítico:p.critico?'Sí':'No',Estado:p.estado,Ingreso:dmy(p.fecha_ingreso),['Clase '+S.anio]:e?e.clase:'',['Sin certificado']:e?e.no_certificado:'',['Fuera de fecha']:e?e.fuera_fecha:'',['Malas condiciones']:e?e.malas_condiciones:'',Observaciones:(e&&e.observaciones)||p.observaciones||''}});
+  if(!window.XLSX){alert('No se pudo cargar el generador de Excel.');return}
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'A.08');XLSX.writeFile(wb,'A.08_Listado_de_proveedores.xlsx')
+}
+
+/* ---------- modal de proveedor ---------- */
+function modal(id){
+  const p=S.provs.find(x=>x.id===id),e=evDe(id,S.anio),h=S.evs.filter(x=>x.proveedor_id===id).sort((a,b)=>b.anio-a.anio);
+  const d=document.createElement('div');d.className='modal';
+  d.innerHTML=`<div class="card"><h3>${esc(p.nombre)}</h3>
+  <div class="meta">${p.tipo} · ${p.critico?'crítico':'no crítico'} · ${p.estado} · ingreso ${dmy(p.fecha_ingreso)||'–'}</div>
+  ${S.edita?`<div class="row" style="margin-top:10px"><label>Estado<select id="me">${['aprobado','provisorio','discontinuado'].map(x=>`<option ${p.estado===x?'selected':''}>${x}</option>`).join('')}</select></label>
+  <label style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="mc" ${p.critico?'checked':''}> Crítico</label>
+  <label style="flex:1">Observaciones<input id="mo" value="${esc(p.observaciones||'')}"></label><button class="b" id="mg">Guardar</button></div>`:''}
+  <h3 style="margin-top:14px">Historial de evaluaciones</h3>
+  <table><thead><tr><th>Año</th><th>Clase</th><th>Sin cert.</th><th>Fuera fecha</th><th>Malas cond.</th><th>Obs.</th></tr></thead><tbody>${h.map(x=>`<tr><td>${x.anio}</td><td>${tagClase(x.clase)}</td><td>${x.no_certificado??'–'}</td><td>${x.fuera_fecha??'–'}</td><td>${x.malas_condiciones??'–'}</td><td class="meta">${esc(x.observaciones||'')}</td></tr>`).join('')||'<tr><td colspan="6" class="meta">Sin evaluaciones</td></tr>'}</tbody></table>
+  <div style="text-align:right;margin-top:10px"><button class="b g" id="mx">Cerrar</button></div></div>`;
+  document.body.appendChild(d);d.onclick=ev=>{if(ev.target===d)d.remove()};$('#mx').onclick=()=>d.remove();
+  if(S.edita)$('#mg').onclick=async()=>{try{await api('/proveedores/'+id,{method:'PUT',json:{estado:$('#me').value,critico:$('#mc').checked,observaciones:$('#mo').value}});await cargar();d.remove();S.msg={t:'o',m:'Proveedor actualizado.'};render()}catch(er){alert(er.message)}}
+}
+
+/* ---------- Evaluación anual (A.25) ---------- */
+function vEval(){
+  const L=activos().sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  $('#m').innerHTML=(S.msg?`<div class="msg ${S.msg.t}">${esc(S.msg.m)}</div>`:'')+
+  `<div class="card"><div class="row">${selAnio()}<button class="b n" id="gen">Generar etiquetas ${S.anio}</button><button class="b v" id="gall">Guardar evaluación ${S.anio}</button></div>
+  <p class="meta">Criterios del I.01 (II.3): se baja una clase con 7 o más entregas sin certificado, 5 o más fuera de fecha o 3 o más con material fuera de lo acordado; si no se da ninguno, se sube una clase (máximo A). Se parte de la clase del año anterior (A si es la primera vez). Los servicios los califica la Dirección. «Generar etiquetas» calcula la clase sugerida con los valores cargados; después la podés cambiar a mano antes de guardar.</p></div>
+  <div class="card scroll"><table><thead><tr><th>Proveedor</th><th>Clase ant.</th><th>Sin cert.</th><th>Fuera fecha</th><th>Malas cond.</th><th>Sugerida</th><th>Clase ${S.anio}</th><th>Observaciones</th></tr></thead><tbody>
+  ${L.map(p=>{const e=evDe(p.id,S.anio),serv=p.tipo==='Servicio';return `<tr data-id="${p.id}"><td><b>${esc(p.nombre)}</b></td><td>${tagClase(claveAnt(p.id,S.anio))}</td>
+   ${serv?'<td colspan="3" class="meta">La Dirección califica según el servicio prestado</td>':['no_certificado','fuera_fecha','malas_condiciones'].map(k=>`<td><input type="number" min="0" data-k="${k}" value="${e&&e[k]!=null?e[k]:''}" placeholder="0"></td>`).join('')}
+   <td class="sug">–</td><td><select data-k="clase"><option value="">—</option>${['A','B','C','D','Sin evaluar'].map(c=>`<option ${e&&e.clase===c?'selected':''}>${c}</option>`).join('')}</select><div class="warn dif"></div></td>
+   <td><input data-k="observaciones" value="${esc((e&&e.observaciones)||'')}" style="width:100%;min-width:160px"></td></tr>`}).join('')}</tbody></table></div>`;
+  bindAnio();
+  const fila=tr=>{const p=S.provs.find(x=>x.id===+tr.dataset.id),g=k=>{const i=tr.querySelector(`[data-k="${k}"]`);return i?i.value:''};
+    const n=k=>g(k)===''?0:+g(k);const s=p.tipo==='Servicio'?claveAnt(p.id,S.anio):sugerida(p.id,S.anio,n('no_certificado'),n('fuera_fecha'),n('malas_condiciones'));return{p,g,n,s}};
+  const pintar=tr=>{const{p,g,s}=fila(tr);tr.querySelector('.sug').innerHTML=tagClase(s);const c=g('clase');tr.querySelector('.dif').textContent=c&&ORD.includes(c)&&c!==s&&p.tipo!=='Servicio'?'difiere de la sugerida por I.01':''};
+  document.querySelectorAll('#m tbody tr').forEach(tr=>{pintar(tr);tr.querySelectorAll('input,select').forEach(i=>i.oninput=()=>pintar(tr))});
+  $('#gen').onclick=()=>{document.querySelectorAll('#m tbody tr').forEach(tr=>{const{p,s}=fila(tr),sel=tr.querySelector('[data-k="clase"]');if(!sel.value)sel.value=p.tipo==='Servicio'?'A':s;pintar(tr)});S.msg={t:'i',m:'Etiquetas generadas para los proveedores sin clase (las ya evaluadas no se tocan). Revisalas y apretá «Guardar evaluación».'};$('#m').insertAdjacentHTML('afterbegin',`<div class="msg i">${S.msg.m}</div>`)};
+  $('#gall').onclick=async()=>{let ok=0,err=[];for(const tr of document.querySelectorAll('#m tbody tr')){const{p,g}=fila(tr),c=g('clase');if(!c)continue;
+    const body={anio:S.anio,clase:c,observaciones:g('observaciones')};if(p.tipo!=='Servicio')Object.assign(body,{no_certificado:g('no_certificado')===''?0:+g('no_certificado'),fuera_fecha:g('fuera_fecha')===''?0:+g('fuera_fecha'),malas_condiciones:g('malas_condiciones')===''?0:+g('malas_condiciones')});
+    try{await api(`/proveedores/${p.id}/evaluacion`,{method:'PUT',json:body});ok++}catch(e){err.push(p.nombre+': '+e.message)}}
+    await cargar();S.msg=err.length?{t:'e',m:`Guardadas ${ok}. Con error: ${err.join(' · ')}`}:{t:'o',m:`Evaluación ${S.anio} guardada: ${ok} proveedores.`};render()};
+}
+(async()=>{if(S.tok){try{await cargar()}catch{}}render()})();
+</script>
+</body>
+</html>
